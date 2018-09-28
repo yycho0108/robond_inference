@@ -1,3 +1,13 @@
+/*
+   Authored by Yoonyoung Cho @ 09.28.2018
+   Heavily inspired by [tabletop_object_detector](https://github.com/ros-interactive-manipulation/pr2_object_manipulation/blob/groovy-devel/perception/tabletop_object_detector/src/tabletop_segmentation.cpp).
+
+
+
+
+
+*/
+
 #include <ros/ros.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>

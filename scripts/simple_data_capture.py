@@ -33,6 +33,8 @@ def main():
     # create dataset directory
     if not os.path.exists(opt.dir):
         os.makedirs(opt.dir)
+
+    sel={}
     for cls in opt.cls.split(';'):
         if len(cls) <= 0: continue # invalid class label
 
@@ -42,7 +44,12 @@ def main():
 
         # initialize with # of files in target directory
         cnt[cls] = len(lsdir(cls_path))
-    print 'cnt', cnt
+
+        sel[ord(cls[0])] = cls
+        print('key mapping : [{}] -> {}'.format(cls[0], cls))
+        # TODO : support key-mapping alias when duplicates
+
+    print('Counts : {}'.format(cnt))
 
     cap = cv2.VideoCapture(opt.src)
     root = opt.dir
@@ -57,10 +64,12 @@ def main():
     degs = np.linspace(0, 360, opt.num, endpoint=False)
     Ms = []
 
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
     while True:
         ret, frame = cap.read()
         if not ret:
-            print 'frame capture unsuccessful'
+            print('frame capture unsuccessful')
 
         if not init:
             # figure out dimensions
@@ -93,19 +102,26 @@ def main():
                 radius=rint(r_ex),
                 color=(255,0,0),
                 thickness=1)
+
+        # current default class info
+        cv2.putText(viz, cls, (0,50), font, 2, (255,255,255) , 2, cv2.LINE_AA)
         cv2.imshow('viz', viz)
 
         k = cv2.waitKey(10)
         if k == 27: # esc
             break
+        elif k in sel:
+            # change class
+            cls = sel[k]
         elif k == 32: # space
-            print 'save!'
+            # capture and save image
             rots = [cv2.warpAffine(frame, M, (n_j,n_i)) for M in Ms]
             for rot in rots:
                 path = os.path.join(opt.dir, cls, '{}.{}'.format(cnt[cls], opt.ext))
                 crop = rot[rint(cy-r_in):rint(cy+r_in),rint(cx-r_in):rint(cx+r_in)]
                 cv2.imwrite(path,crop)
                 cnt[cls] += 1
+            print 'capture! {}:{}'.format(cls,cnt[cls])
 
 if __name__ == "__main__":
     main()
